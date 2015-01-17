@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta   http-equiv="content-type" content="text/html; charset=UTF-8">
+        <script type="text/javascript"    src="currencies.js"></script>
+        <link   type="text/css"           rel="stylesheet" href="currencies.css">
+        <title>Конвертер валют для Onliner.by</title>
+    </head>
+    <body>
+        <div class="body">
+            <form name="login_form" action="" method="get" onsubmit="return false;" id="popup_login_form">
+                <table cellpadding="0" cellspacing="0" border="0" >
+                    <tbody>
+                        <tr>
+                            <td align="right">USD</td>
+                            <td><input type="text" name="usd" value="" tabindex="1"></td>
+                        </tr>
+                        <tr>
+                            <td align="right">EUR</td>
+                            <td><input type="text" name="eur" value="" tabindex="2"></td>
+                        </tr>
+                        <tr>
+                            <td align="right">RUS</td>
+                            <td><input type="text" name="rus" value="" tabindex="3"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" align="center"><input type="button" value="Save" class="button" id="popup_save_btn"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+        <div id="loader"><img src="ajax-loader.gif" title="Loding" alt="Loading"></div>
+    </body>
+</html>

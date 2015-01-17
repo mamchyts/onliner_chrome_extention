@@ -1,0 +1,294 @@
+// set handler to tabs:  need for seng objects to backgroung.js
+chrome.extension.onConnect.addListener(function(port){
+    port.onMessage.addListener(factory);
+});
+
+
+/**
+ * Function remove spaces in begin and end of string
+ *
+ * @version 2012-11-05
+ * @param   string  str
+ * @return  string
+ */
+function trim(str)
+{
+    return String(str).replace(/^\s+|\s+$/g, '');
+}
+
+
+/**
+ * Function return element by id
+ *
+ * @version 2012-07-22
+ * @param   string   id    title of id
+ * @return  Object
+ */
+function $(id)
+{
+    return document.getElementById(id);
+}
+
+
+/**
+ * Function return element by class name
+ *
+ * @version 2012-11-07
+ * @param   string   classList
+ * @param   object   node
+ * @return  Object
+ */
+function $$(classList, node)
+{
+    if(document.getElementsByClassName)
+        return (node || document).getElementsByClassName(classList);
+    else{
+        var node = node || document,
+        list = node.getElementsByTagName('*'), 
+        length = list.length,  
+        classArray = classList.split(/\s+/), 
+        classes = classArray.length, 
+        result = [], i,j;
+
+        for(i = 0; i < length; i++) {
+            for(j = 0; j < classes; j++)  {
+                if(list[i].className.search('\\b' + classArray[j] + '\\b') != -1) {
+                    result.push(list[i])
+                    break
+                }
+            }
+        }
+
+        return result;
+    }
+}
+
+
+/**
+ * Functino will be called from background.js
+ * 
+ * @return void
+ */
+function initialization(){
+    window.popup = new popupObj();
+}
+
+
+/**
+ * Functino will be called when background.js send some data by port interface
+ * 
+ * @return void
+ */
+function factory(obj){
+    if(obj && obj.method){
+        if(obj.data)
+            window.popup[obj.method](obj.data);
+        else
+            window.popup[obj.method]();
+    }
+}
+
+
+/**
+ * Popup object
+ *
+ * @version 2013-10-11
+ * @return  Object
+ */
+window.popupObj = function(){
+};
+
+
+/**
+ * Pablic methods
+ */
+window.popupObj.prototype = {
+
+    /**
+     * some internal params
+     */
+    currencies: null,
+    tab_id: null,
+    port: null,
+    interval: null,
+
+    /**
+     * Function will be called from bg.js
+     */
+    setCurrencies: function(currencies)
+    {
+        this.currencies = currencies;
+    },
+
+    /**
+     * Function will be called from bg.js
+     */
+    setTabId: function(id)
+    {
+        this.tab_id = id;
+    },
+
+    /**
+     * Function will be called from bg.js
+     */
+    getTabId: function()
+    {
+        return this.tab_id;
+    },
+
+    /**
+     * Function check total host
+     */
+    run: function()
+    {
+        // get total host
+        if(document.location.host && (document.location.host != ''))
+            this.total_host = document.location.host;
+        else if(document.location.hostname && (document.location.hostname != ''))
+            this.total_host = document.location.hostname;
+
+        if(!this.total_host || (this.total_host === ''))
+            return 0;
+
+        if(this.total_host.indexOf('onliner.by') == -1)
+            return 0;
+
+        // create connection to bg.js and send request
+        this.port = chrome.extension.connect();
+        this.port.postMessage({method:'changePrices', data:{tab_id:this.tab_id}});
+    },
+
+    /**
+     * Function will be called from bg.js
+     * Parse page
+     */
+    changeOnlinerPrices: function()
+    {
+        // infinity func
+        if(!window.popup.interval){
+            window.popup.interval = setInterval(function() {
+                window.popup.changeOnlinerPrices();
+            }, 500);
+        }
+
+        if((this.total_host.indexOf('ab.onliner.by') != -1) || (this.total_host.indexOf('mb.onliner.by') != -1)){
+            this.abPrices();
+        }
+    },
+
+    /**
+     * change prices
+     */
+    abPrices: function()
+    {
+        var table = false;
+        if($$('grid-autoba') && $$('adverts-table', $$('grid-autoba')[0]))
+            table = $$('adverts-table', $$('grid-autoba')[0])[0];
+
+        if($$('autoba-hd-details-costs').length && ($$('updatedPrice').length == 0) ){
+            var price = $$('autoba-hd-details-costs')[0].children[0].children[0];
+            var by_price = price.innerHTML.replace(/[\s]/ig, '');
+
+            // compile prices
+            var prices = this.compilePrices(by_price);
+
+            var html = '';
+            var html2 = '';
+            for(k in prices){
+                html += '<span class="autoba-hd-details-costs updatedPrice" style="margin-left:20px"><span class="cost"><strong>'+trim(prices[k])+'</strong></span></span><strong class="c-torg">'+k.toUpperCase()+'</strong>';
+                html2 += '<div class="autoba-hd-details"><span class="autoba-hd-details-costs"><span class="cost"><strong>'+trim(prices[k])+'</strong></span></span><strong class="c-torg">'+k.toUpperCase()+'</strong></div>';
+            }
+
+            price.parentNode.parentNode.parentNode.innerHTML += html;
+            $('autoba-contacts-content').parentNode.innerHTML += html2
+        }
+        else if( (($$('carRow', table).length != 0) || ($$('motoRow', table).length != 0)) && ($$('updatedPrice', table).length == 0)){
+            var rows = [];
+            if($$('carRow', table).length)
+                rows = $$('carRow', table);
+            else if($$('motoRow', table).length)
+                rows = $$('motoRow', table);
+
+            for(var i = 0, len = rows.length; i < len; ++i){
+                if(!$$('cost-i', rows[i])[0]
+                    || !$$('cost-i', rows[i])[0].children[0]
+                    || !$$('cost-i', rows[i])[0].children[0].children[0]
+                    || !$$('cost-i', rows[i])[0].children[0].children[0].children[0] ){
+                    continue;
+                }
+
+                    // add helper class
+                if(rows[i].className.indexOf('updatedPrice') != -1)
+                    continue;
+                else
+                    rows[i].className += ' updatedPrice';
+
+                var price = $$('cost-i', rows[i])[0].children[0].children[0].children[0];
+                var by_price = price.innerHTML.replace(/[\s]/ig, '');
+
+                var prices = this.compilePrices(by_price);
+
+                var link = price.parentNode.href;
+                var html = '<p style="height: 0px;">&nbsp;</p>';
+                for(k in prices){
+                    html += '<p class="big"><a href="'+link+'"><strong style="font-size: 13px;">'+trim(prices[k])+' <span style="color: #f00">'+k.toUpperCase()+'</span></strong></a></p>';
+                }
+
+                price.parentNode.parentNode.parentNode.innerHTML += html;
+            }
+        }
+    },
+
+    /**
+     * compilePrices method
+     */
+    compilePrices: function(by_price)
+    {
+        if(!by_price)
+            by_price = 0
+
+        var prices = {
+            usd: Math.round(by_price/this.currencies.usd).toString(),
+            eur: Math.round(by_price/this.currencies.eur).toString(),
+            rub: Math.round(by_price/this.currencies.rub).toString()
+        }
+
+        for(k in prices){
+            if(prices[k].length == 4){
+                prices[k] = prices[k].substr(0, 1)+' '+prices[k].substr(1, 3);
+            }
+            else if(prices[k].length == 5){
+                prices[k] = prices[k].substr(0, 2)+' '+prices[k].substr(2, 3);
+            }
+            else if(prices[k].length == 6){
+                prices[k] = prices[k].substr(0, 3)+' '+prices[k].substr(3, 3);
+            }
+            else if(prices[k].length == 7){
+                prices[k] = prices[k].substr(0, 1)+' '+prices[k].substr(1, 3)+' '+prices[k].substr(4, 3);
+            }
+            else if(prices[k].length == 8){
+                prices[k] = prices[k].substr(0, 2)+' '+prices[k].substr(2, 3)+' '+prices[k].substr(5, 3);
+            }
+            else if(prices[k].length == 9){
+                prices[k] = prices[k].substr(0, 3)+' '+prices[k].substr(3, 3)+' '+prices[k].substr(6, 3);
+            }
+        }
+
+        return prices;
+    },
+
+    /**
+     * Function reload page
+     */
+    reloadPage: function()
+    {
+        window.location.reload();
+    },
+
+    /**
+     * Empty method
+     */
+    empty: function()
+    {
+    }
+}
