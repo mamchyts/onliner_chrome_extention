@@ -81,6 +81,11 @@ function initialization(){
  */
 function factory(obj){
     if(obj && obj.method){
+        if(obj.method == 'init'){
+            window.popup = new popupObj();
+            return 0;
+        }
+
         if(obj.data)
             window.popup[obj.method](obj.data);
         else

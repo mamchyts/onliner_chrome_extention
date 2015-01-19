@@ -59,7 +59,7 @@ window.onload = function(){
         // if tab load
         if (info && info.status){ //  && (info.status.toLowerCase() === 'complete')
             // if user open empty tab or ftp protocol and etc.
-            if(!id || !tab || !tab.url || (tab.url.indexOf('http') == -1))
+            if(!id || !tab || !tab.url || (tab.url.indexOf('onliner.by') == -1))
                 return 0;
 
             // save tab info if need
@@ -70,7 +70,8 @@ window.onload = function(){
             window.bg.tabs[id].port_info = port;
 
             // run function in popup.html
-            chrome.tabs.executeScript(id, {code:"initialization()"});
+//            chrome.tabs.executeScript(id, {code:"initialization()"});
+            window.bg.tabs[id].port_info.postMessage({method:'init'});
 
             // send id, hosts and others information into popup.js
             window.bg.tabs[id].port_info.postMessage({method:'setCurrencies', data:window.bg.currencies});
