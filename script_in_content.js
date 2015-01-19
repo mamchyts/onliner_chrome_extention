@@ -174,6 +174,9 @@ window.popupObj.prototype = {
         if((this.total_host.indexOf('ab.onliner.by') != -1) || (this.total_host.indexOf('mb.onliner.by') != -1)){
             this.abPrices();
         }
+        else if((this.total_host.indexOf('baraholka.onliner.by') != -1)){
+            this.baraholkaPrices();
+        }
     },
 
     /**
@@ -275,6 +278,66 @@ window.popupObj.prototype = {
         }
 
         return prices;
+    },
+
+    /**
+     * change prices
+     */
+    baraholkaPrices: function()
+    {
+        var table = false;
+        if($$('ba-tbl-list__table').length)
+            table = $$('ba-tbl-list__table')[0];
+
+        var ul_obj = false;
+        if($$('b-ba-topicdet').length)
+            ul_obj = $$('b-ba-topicdet')[0];
+
+        // if alredy done
+        if((!table || table.className.indexOf('updatedPrice') != -1) && (!ul_obj || $$('updatedPrice').length))
+            return 0;
+
+        if( ul_obj && ul_obj.children && ul_obj.children[0]){
+            var price = ul_obj.children[0];
+            var by_price = parseInt(price.textContent.replace(/[\s]/ig, ''));
+
+            // compile prices
+            var prices = this.compilePrices(by_price);
+
+            var html_ = '';
+            for(k in prices){
+                html_ += '<li class="cost">'+trim(prices[k])+'</li><li class="torg" style="margin-right: 20px;">'+k.toUpperCase()+'</li>';
+            }
+
+            var pre_html = '<ul class="b-ba-topicdet updatedPrice">'+html_+'</ul>'
+            price.parentNode.parentNode.innerHTML += pre_html;
+        }
+        else if( $$('cost', table).length != 0 ){
+            var rows = [];
+            rows = $$('cost', table);
+
+            for(var i = 0, len = rows.length; i < len; ++i){
+                if(!rows[i].children.length){
+                    continue;
+                }
+
+                if(!rows[i].children[0].children || !rows[i].children[0].children[0])
+                    continue;
+
+                var price = rows[i].children[0].children[0];
+                var by_price = price.innerHTML.replace(/[\s]/ig, '');
+
+                var prices = this.compilePrices(by_price);
+
+                var html = '';
+                for(k in prices){
+                    html += '<p><big><strong>'+trim(prices[k])+'</strong> <span style="color: #f00">'+k.toUpperCase()+'</span></big></p>';
+                }
+
+                price.parentNode.parentNode.innerHTML += html;
+                table.className += ' updatedPrice';
+            }
+        }
     },
 
     /**
