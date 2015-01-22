@@ -182,6 +182,9 @@ window.popupObj.prototype = {
         else if((this.total_host.indexOf('baraholka.onliner.by') != -1)){
             this.baraholkaPrices();
         }
+        else if((this.total_host.indexOf('r.onliner.by') != -1)){
+            this.rentPrices();
+        }
     },
 
     /**
@@ -341,6 +344,75 @@ window.popupObj.prototype = {
 
                 price.parentNode.parentNode.innerHTML += html;
                 table.className += ' updatedPrice';
+            }
+        }
+    },
+
+    /**
+     * change prices
+     */
+    rentPrices: function()
+    {
+        if(($$('arenda-main__box').length == 0) && ($$('apartment-bar__inner').length == 0))
+            return 0;
+
+        var rows_list = $$('classified__figure');
+        var rows_view = $$('apartment-bar__inner');
+        var rows_done = $$('updatedPrice');
+
+        if( rows_view.length && (rows_view.length != rows_done.length)){
+            var price = $$('apartment-bar__value_key')[0];
+            var by_price = parseInt(price.textContent.replace(/[\s]/ig, ''));
+
+            // compile prices
+            var prices = this.compilePrices(by_price);
+
+            var html = '';
+            for(k in prices){
+                margin_right = 4;
+                if(k == 'rub')
+                    margin_right = 0;
+
+                html += '<div class="apartment-bar__item apartment-bar__item_price" style="margin-right: '+margin_right+'px;"><div class="apartment-bar__value apartment-bar__value_key">'+trim(prices[k])+'</div><div class="apartment-bar__value">'+k.toUpperCase()+'</div></div>';
+            }
+
+            var newItem = document.createElement("span");
+            newItem.innerHTML = html;
+            price.parentNode.parentNode.insertBefore(newItem, price.parentNode.parentNode.children[1]);
+
+            rows_view[0].className += ' updatedPrice'
+        }
+        else if( rows_list.length && (rows_list.length != rows_done.length)){
+            var rows = [];
+            rows = rows_list;
+
+            for(var i = 0, len = rows.length; i < len; ++i){
+                if(!rows[i].children.length || (rows[i].className.indexOf('updatedPrice') != -1)){
+                    continue;
+                }
+
+                if(!rows[i].children[0].children || !rows[i].children[0].children[0])
+                    continue;
+
+                var spec_price = false;
+                var price = rows[i].children[0].children[0];
+                if(trim(price.innerHTML) == ''){
+                    price = rows[i].children[0].textContent;
+                    spec_price = true;
+                }
+
+                // prices on MAP
+                if(spec_price){
+                    var by_price = parseInt(price.replace(/[\s]/ig, ''));
+                }
+                else
+                    var by_price = price.innerHTML.replace(/[\s]/ig, '');
+
+                var prices = this.compilePrices(by_price);
+
+                var html = '<div style="position: absolute; float: right; display: block; top: -105px; right: 5px; background: #fd2; padding: 5px 0px 5px 10px">'+trim(prices.usd)+' <span style="background: #fd8e01; padding: 3px 5px">USD</span></div>';
+                rows[i].children[0].innerHTML += html;
+                rows[i].className += ' updatedPrice';
             }
         }
     },

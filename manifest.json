@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Конвертер валют для Onliner.by",
-    "version": "0.6.2",
+    "version": "0.7.0",
 
     "icons": {
         "16": "./16x16.png",
@@ -32,6 +32,6 @@
 
     "browser_action": {
         "default_title": "Конвертер валют для Onliner.by",
-        "default_icon" : "./16x16.png"
+        "default_icon" : "./48x48.png"
     }
 }
