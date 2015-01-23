@@ -7,7 +7,7 @@ html, body{
 .body{
     margin: 5px;
     display: block;
-    width: 131px;
+    width: 160px;
     height: 125px;
     padding: 5px;
     background-color: #EFF1F5;
@@ -96,4 +96,8 @@ table{
         padding-top: 5px;
         padding-bottom: 5px;
         width: 100%
+    }
+
+    table input[type="checkbox"]{
+        margin-left: 4px;
     }

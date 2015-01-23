@@ -75,6 +75,7 @@ window.onload = function(){
 
             // send id, hosts and others information into popup.js
             window.bg.tabs[id].port_info.postMessage({method:'setCurrencies', data:window.bg.currencies});
+            window.bg.tabs[id].port_info.postMessage({method:'setCheckboxes', data:window.bg.checkboxes});
             window.bg.tabs[id].port_info.postMessage({method:'setTabId', data:id});
             window.bg.tabs[id].port_info.postMessage({method:'run'});
         };
@@ -123,6 +124,7 @@ window.bgObj.prototype = {
     active_tab: {},
     grabber_hosts: {},
     done_urls: [],
+    checkboxes: {},
 
     /**
      * init() function
@@ -131,6 +133,12 @@ window.bgObj.prototype = {
     {
         // if user not logged into application set currencies.html popup
         chrome.browserAction.setPopup({popup: "currencies.html"});
+
+        this.checkboxes = {
+            usd: 1,
+            eur: 0,
+            rub: 1
+        }
     },
 
     /**
@@ -153,6 +161,7 @@ window.bgObj.prototype = {
         for(tab_id in this.tabs){
             // fix bug
             if(this.tabs[tab_id].tab_obj && this.tabs[tab_id].tab_obj.url && (this.tabs[tab_id].tab_obj.url.indexOf('onliner.by') != -1)){
+                this.tabs[tab_id].port_info.postMessage({method:'setCheckboxes', data:this.checkboxes});
                 this.tabs[tab_id].port_info.postMessage({method:'changeOnlinerPrices'});
             }
         }
@@ -164,13 +173,23 @@ window.bgObj.prototype = {
     updateCurrencies: function(data)
     {
         if(data.usd)
-            this.currencies.usd = parseInt(data.usd);
+            this.currencies.usd = parseFloat(data.usd);
         if(data.eur)
-            this.currencies.eur = parseInt(data.eur);
+            this.currencies.eur = parseFloat(data.eur);
         if(data.rub)
-            this.currencies.rub = parseInt(data.rub);
+            this.currencies.rub = parseFloat(data.rub);
 
         this.setCurrencyRate();
+    },
+
+    /**
+     * Function will be called from popup.js
+     */
+    updateCheckboxes: function(data)
+    {
+        this.checkboxes.usd = data.usd;
+        this.checkboxes.eur = data.eur;
+        this.checkboxes.rub = data.rub;
     },
 
     /**
@@ -179,6 +198,14 @@ window.bgObj.prototype = {
     getCurrencies: function()
     {
         return this.currencies;
+    },
+
+    /**
+     * Function will be called from currencies.js
+     */
+    getCheckboxes: function()
+    {
+        return this.checkboxes;
     },
 
     /**

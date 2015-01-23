@@ -116,6 +116,7 @@ window.popupObj.prototype = {
     tab_id: null,
     port: null,
     interval: null,
+    checkboxes: null,
 
     /**
      * Function will be called from bg.js
@@ -123,6 +124,14 @@ window.popupObj.prototype = {
     setCurrencies: function(currencies)
     {
         this.currencies = currencies;
+    },
+
+    /**
+     * Function will be called from bg.js
+     */
+    setCheckboxes: function(checkboxes)
+    {
+        this.checkboxes = checkboxes;
     },
 
     /**
@@ -258,11 +267,13 @@ window.popupObj.prototype = {
         if(!by_price)
             by_price = 0
 
-        var prices = {
-            usd: Math.round(by_price/this.currencies.usd).toString(),
-            eur: Math.round(by_price/this.currencies.eur).toString(),
-            rub: Math.round(by_price/this.currencies.rub).toString()
-        }
+        var prices = {};
+        if(this.checkboxes.usd == 1)
+            prices.usd = Math.round(by_price/this.currencies.usd).toString();
+        if(this.checkboxes.eur == 1)
+            prices.eur = Math.round(by_price/this.currencies.eur).toString();
+        if(this.checkboxes.rub == 1)
+            prices.rub = Math.round(by_price/this.currencies.rub).toString();
 
         for(k in prices){
             if(prices[k].length == 4){
