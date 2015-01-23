@@ -134,10 +134,15 @@ window.bgObj.prototype = {
         // if user not logged into application set currencies.html popup
         chrome.browserAction.setPopup({popup: "currencies.html"});
 
-        this.checkboxes = {
-            usd: 1,
-            eur: 0,
-            rub: 1
+        if(window.localStorage && window.localStorage.getItem('bg_checkboxes')){
+            this.checkboxes = window.localStorage.getItem('bg_checkboxes');
+        }
+        else{
+            this.checkboxes = {
+                usd: 1,
+                eur: 0,
+                rub: 1
+            };
         }
     },
 
@@ -190,6 +195,8 @@ window.bgObj.prototype = {
         this.checkboxes.usd = data.usd;
         this.checkboxes.eur = data.eur;
         this.checkboxes.rub = data.rub;
+
+        window.localStorage.setItem('bg_checkboxes', this.checkboxes);
     },
 
     /**
@@ -244,7 +251,8 @@ window.bgObj.prototype = {
      */
     reloadPage: function()
     {
-        this.tabs[this.active_tab.tabId].port_info.postMessage({method:'reloadPage'});
+        if(this.tabs[this.active_tab.tabId])
+            this.tabs[this.active_tab.tabId].port_info.postMessage({method:'reloadPage'});
     },
 
     /**
