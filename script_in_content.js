@@ -396,7 +396,9 @@ window.popupObj.prototype = {
 
                 var spec_price = false;
                 var price = rows[i].children[0].children[0];
-                if(trim(price.innerHTML) == ''){
+
+                // fix bug
+                if(trim(price.textContent).indexOf('руб') != -1){
                     price = rows[i].children[0].textContent;
                     spec_price = true;
                 }
