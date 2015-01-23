@@ -70,7 +70,6 @@ window.onload = function(){
             window.bg.tabs[id].port_info = port;
 
             // run function in popup.html
-//            chrome.tabs.executeScript(id, {code:"initialization()"});
             window.bg.tabs[id].port_info.postMessage({method:'init'});
 
             // send id, hosts and others information into popup.js
@@ -134,13 +133,18 @@ window.bgObj.prototype = {
         // if user not logged into application set currencies.html popup
         chrome.browserAction.setPopup({popup: "currencies.html"});
 
+        this.checkboxes = false;
         if(window.localStorage && window.localStorage.getItem('bg_checkboxes')){
-            this.checkboxes = window.localStorage.getItem('bg_checkboxes');
+            var checkboxes = window.localStorage.getItem('bg_checkboxes');
+            if((checkboxes.indexOf('usd') != -1) && (checkboxes.indexOf('eur') != -1)){
+                this.checkboxes = JSON.parse(checkboxes);
+            }
         }
-        else{
+
+        if(!this.checkboxes){
             this.checkboxes = {
                 usd: 1,
-                eur: 0,
+                eur: 1,
                 rub: 1
             };
         }
@@ -196,7 +200,7 @@ window.bgObj.prototype = {
         this.checkboxes.eur = data.eur;
         this.checkboxes.rub = data.rub;
 
-        window.localStorage.setItem('bg_checkboxes', this.checkboxes);
+        window.localStorage.setItem('bg_checkboxes', JSON.stringify(this.checkboxes));
     },
 
     /**

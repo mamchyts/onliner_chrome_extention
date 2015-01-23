@@ -423,7 +423,21 @@ window.popupObj.prototype = {
 
                 var prices = this.compilePrices(by_price);
 
-                var html = '<div style="position: absolute; float: right; display: block; top: -105px; right: 5px; background: #fd2; padding: 5px 0px 5px 10px">'+trim(prices.usd)+' <span style="background: #fd8e01; padding: 3px 5px">USD</span></div>';
+                var p, c;
+                if(prices.usd){
+                    p = prices.usd;
+                    c = 'USD';
+                }
+                else if(prices.eur){
+                    p = prices.eur;
+                    c = 'EUR';
+                }
+                else if(prices.rub){
+                    p = prices.rub;
+                    c = 'RUB';
+                }
+
+                var html = '<div style="position: absolute; float: right; display: block; top: -105px; right: 5px; background: #fd2; padding: 5px 0px 5px 10px">'+trim(p)+' <span style="background: #fd8e01; padding: 3px 5px">'+c+'</span></div>';
                 rows[i].children[0].innerHTML += html;
                 rows[i].className += ' updatedPrice';
             }

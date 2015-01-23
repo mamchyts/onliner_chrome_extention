@@ -24,6 +24,10 @@ window.onload = function(){
             checkboxes.eur = (form.elements[3].checked)?1:0;
             checkboxes.rub = (form.elements[5].checked)?1:0;
 
+            // one currency is requied
+            if(!checkboxes.usd && !checkboxes.eur && !checkboxes.rub)
+                checkboxes.usd = 1;
+
             setTimeout(function(){
                 bg_wnd.bg.updateCheckboxes(checkboxes);
                 bg_wnd.bg.updateCurrencies(data);
