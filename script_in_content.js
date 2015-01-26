@@ -194,6 +194,9 @@ window.popupObj.prototype = {
         else if((this.total_host.indexOf('r.onliner.by') != -1)){
             this.rentPrices();
         }
+        else if((this.total_host.indexOf('catalog.onliner.by') != -1)){
+            this.catalogPrices();
+        }
     },
 
     /**
@@ -441,6 +444,218 @@ window.popupObj.prototype = {
                 rows[i].children[0].innerHTML += html;
                 rows[i].className += ' updatedPrice';
             }
+        }
+    },
+
+
+    /**
+     * change prices
+     */
+    catalogPrices: function()
+    {
+        if(($$('pprice_byr').length == 0) && ($$('b-offers-desc__info-sub').length == 0) && ($$('pgprice').length == 0))
+            return 0;
+
+        var rows_list = $$('pprice_byr');
+        var rows_view = $$('b-offers-desc__info-sub');
+        var rows_done = $$('updatedPrice');
+        var rows_hidden = $$('b-offers-desc__list');
+        var rows_tables = $$('pgprice');
+
+        if((rows_tables.length != 0) && (rows_list.length == 0))
+            rows_list = rows_tables;
+
+        // chenge shops prices
+        this.catalogShopsPrices();
+
+
+        if( rows_view.length && (rows_view.length != rows_done.length)){
+            var price = trim(rows_view[0].children[0].textContent);
+            var price_ = price.split('–');
+
+            if((price == '') || (price_.length === 0)){
+                return 0;
+            }
+            else if((price_.length === 1) && price_[0].indexOf('руб') != -1){
+                var price = trim(rows_view[0].textContent);
+                var price_ = price.split('–');
+            }
+
+            var by_prices = [];
+            for(p in price_){
+                by_prices.push(parseInt(trim(price_[p].replace(/[\s]/ig, ''))));
+            }
+
+            // final price obj
+            var prices = {};
+            for(j in by_prices){
+                tmp = this.compilePrices(by_prices[j]);
+                for(k in tmp){
+                    if(!prices[k])
+                        prices[k] = [];
+                    prices[k].push(tmp[k]);
+                }
+            }
+
+            // compile html
+            var html = '';
+            for(k in prices){
+                if(rows_view[0].children[0].href)
+                    html += '<br/><a style="line-height: 40px;" href="'+rows_view[0].children[0].href+'">'+prices[k].join(' - ')+'<small> '+k.toUpperCase()+'</small></a>';
+                else
+                    html += '<br/><br/><span>'+prices[k].join(' - ')+'<small> '+k.toUpperCase()+'</small></span>';
+            }
+
+            var newItem = document.createElement("span");
+            newItem.innerHTML = html+'<br/>';
+            rows_view[0].insertBefore(newItem, rows_view[0].children[1]);
+            rows_view[0].className += ' updatedPrice';
+            rows_view[0].children[0].style.marginBottom = '4px';
+
+
+            if(!rows_hidden || (rows_hidden.length == 0))
+                return 0;
+
+
+            // hidden prices
+            var children_rows = rows_hidden[0].children
+            for(i = 0, len = children_rows.length; i < len; ++i){
+                var price = trim(children_rows[i].children[0].children[0].innerHTML);
+                var price_ = price.split('</ins>');
+
+                if(price_.length != 2)
+                    continue;
+
+                var price_ = trim(price_[1]).split('–');
+
+                if(price_.length != 2){
+                    continue;
+                }
+
+                var by_prices = [];
+                for(p in price_){
+                    by_prices.push(parseInt(trim(price_[p].replace(/[\s]|(&nbsp;)/ig, ''))));
+                }
+
+                // final price obj
+                var prices = {};
+                for(j in by_prices){
+                    tmp = this.compilePrices(by_prices[j]);
+                    for(k in tmp){
+                        if(!prices[k])
+                            prices[k] = [];
+                        prices[k].push(tmp[k]);
+                    }
+                }
+
+                // compile html
+                var html = '';
+                for(k in prices){
+                    html += '<span style="margin-left: 10px;">'+prices[k].join(' - ')+'<span style="color: #f00000;"> '+k.toUpperCase()+'</span></span>;';
+                }
+
+                children_rows[i].children[0].children[0].innerHTML += html;
+            }
+            // END hidden prices
+        }
+        else if( rows_list.length && (rows_list.length != rows_done.length)){
+            var rows = [];
+            rows = rows_list;
+
+            for(var i = 0, len = rows.length; i < len; ++i){
+                if(rows[i].className.indexOf('updatedPrice') != -1){
+                    continue;
+                }
+
+                var price = trim(rows[i].textContent);
+                var price_ = price.split('-');
+
+                if((price == '') || (price_.length === 0)){
+                    continue;
+                }
+
+                var by_prices = [];
+                for(p in price_){
+                    by_prices.push(parseInt(trim(price_[p].replace(/[\s]|(&nbsp;)/ig, ''))));
+                }
+
+                // final price obj
+                var prices = {};
+                for(j in by_prices){
+                    tmp = this.compilePrices(by_prices[j]);
+                    for(k in tmp){
+                        if(!prices[k])
+                            prices[k] = [];
+                        prices[k].push(tmp[k]);
+                    }
+                }
+
+                // compile html
+                if(rows_tables.length){
+                    var html = '';
+                    for(k in prices){
+                        html += '<br/><a href="'+rows[i].children[0].href+'">'+prices[k].join(' - ')+' <span style="color: #f00; font-size: 13px;">'+k.toUpperCase()+'</span></a></div>';
+                    }
+
+                    rows[i].innerHTML += html;
+                }
+                else{
+                    var html = '';
+                    for(k in prices){
+                        html += '<div class="pprice" style="font-size: 13px;">'+prices[k].join(' - ')+' <span style="color: #f00; font-size: 13px;">'+k.toUpperCase()+'</span></div>';
+                    }
+
+                    var newItem = document.createElement("div");
+                    newItem.innerHTML = html;
+                    rows[i].parentNode.insertBefore(newItem, rows[i].parentNode.children[1]);
+                }
+                rows[i].className += ' updatedPrice';
+            }
+        }
+    },
+
+    /**
+     * change prices
+     */
+    catalogShopsPrices: function()
+    {
+        var rows_list = $$('product-aside__price--primary');
+        var rows_list2 = $$('js-currency-primary');
+
+        if((rows_list.length === 0) && (rows_list2.length === 0))
+            return 0;
+
+        if((rows_list.length === 0) && (rows_list2.length != 0)){
+            rows_list = rows_list2;
+            var font_size = '20px';
+        }
+        else{
+            var font_size = '13px';
+        }
+
+        var rows = [];
+        rows = rows_list;
+
+        for(var i = 0, len = rows.length; i < len; ++i){
+            if(rows[i].parentNode.className.indexOf('updatedPrice2') != -1){
+                continue;
+            }
+
+            var price = trim(rows[i].textContent);
+            by_price = parseInt(trim(price.replace(/[\s]/ig, '')));
+
+            // final price obj
+            var prices = this.compilePrices(by_price);
+
+
+            // compile html
+            var html = '';
+            for(k in prices){
+                html += '<div style="font-size: '+font_size+'; color: #000; font-weight: bold;">'+prices[k]+' <span style="color: #f00; font-size: '+font_size+';">'+k.toUpperCase()+'</span></div>';
+            }
+
+            rows[i].parentNode.innerHTML += html;
+            rows[i].parentNode.className += ' updatedPrice2';
         }
     },
 
