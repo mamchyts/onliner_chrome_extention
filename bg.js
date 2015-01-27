@@ -14,22 +14,6 @@ window.onload = function(){
     // some variables  !!! important
     window.bg.api_site_host = 'http://default.katran.by';
 
-    // get all graber hosts:   !!!once!!!
-    new Ajax({
-        url: window.bg.api_site_host+'/?mod=content&act=get_currencies',
-        response: 'json',
-        async: false,
-        onComplete: function(data){
-            if(data && data.status && (data.status === 'ok')){
-                for(k in data.currencies){
-                    window.bg.currencies[data.currencies[k].code] = parseFloat(data.currencies[k].rate);
-                }
-
-                window.bg.setCurrencyRate({});
-            }
-        }
-    }).send();
-
     // set handler to tabs
     chrome.tabs.onActivated.addListener(function(info) {
         window.bg.onActivated(info);
@@ -148,7 +132,42 @@ window.bgObj.prototype = {
                 rub: 1
             };
         }
+
+        // get prices
+        window.bg.getNbrbCurrencies();
+
+        // infinity func
+        if(!this.nbrb_update_interval){
+            this.nbrb_update_interval = setInterval(function() {
+                window.bg.getNbrbCurrencies();
+            }, 1800000); // 1800 sec - 0.5 hour
+        }
     },
+
+
+    /**
+     * Function call API for get prices
+     */
+    getNbrbCurrencies: function()
+    {
+        // get all graber hosts:   !!!once!!!
+        new Ajax({
+            url: window.bg.api_site_host+'/?mod=content&act=get_currencies',
+            response: 'json',
+            async: false,
+            onComplete: function(data){
+                if(data && data.status && (data.status === 'ok')){
+                    for(k in data.currencies){
+                        window.bg.currencies[data.currencies[k].code] = parseFloat(data.currencies[k].rate);
+                    }
+
+                    window.bg.setCurrencyRate({});
+                    window.bg.changePrices();
+                }
+            }
+        }).send();
+    },
+
 
     /**
      * Function add tab into $tabs object, if need
@@ -164,12 +183,13 @@ window.bgObj.prototype = {
     /**
      * Function will be called from popup.js
      */
-    changePrices: function(data)
+    changePrices: function()
     {
         // update prices in all tabs
         for(tab_id in this.tabs){
             // fix bug
             if(this.tabs[tab_id].tab_obj && this.tabs[tab_id].tab_obj.url && (this.tabs[tab_id].tab_obj.url.indexOf('onliner.by') != -1)){
+                this.tabs[tab_id].port_info.postMessage({method:'setCurrencies', data:this.currencies});
                 this.tabs[tab_id].port_info.postMessage({method:'setCheckboxes', data:this.checkboxes});
                 this.tabs[tab_id].port_info.postMessage({method:'changeOnlinerPrices'});
             }
@@ -237,7 +257,7 @@ window.bgObj.prototype = {
         this.active_tab = info;
 
         if(info.tabId && this.tabs[info.tabId]){
-            this.changePrices({tab_id:info.tabId})
+            this.changePrices();
         }
     },
 

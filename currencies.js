@@ -3,8 +3,8 @@
  * 
  * @return void
  */
-window.onload = function(){
-
+window.onload = function()
+{
     bg_wnd = chrome.extension.getBackgroundPage();
     form = document.getElementById('popup_login_form');
 
@@ -40,6 +40,26 @@ window.onload = function(){
         }
         return false;
     };
+
+    // get actual prices
+    updatePrices()
+
+    // infinity func
+    if(!window.update_interval){
+        window.update_interval = setInterval(function() {
+            updatePrices()
+        }, 3600000); // 3600 sec - 1 hour
+    }
+}
+
+
+/**
+ * updatePrices
+ * @return void
+ */
+function updatePrices()
+{
+    bg_wnd = chrome.extension.getBackgroundPage();
 
     var currencies = bg_wnd.bg.getCurrencies();
     form.elements[0].value = currencies.usd;
