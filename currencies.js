@@ -48,7 +48,7 @@ window.onload = function()
     if(!window.update_interval){
         window.update_interval = setInterval(function() {
             updatePrices()
-        }, 3600000); // 3600 sec - 1 hour
+        }, 1000000); // every 1000 sec
     }
 }
 
