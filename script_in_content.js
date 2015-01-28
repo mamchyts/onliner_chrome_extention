@@ -178,12 +178,12 @@ window.popupObj.prototype = {
      */
     changeOnlinerPrices: function()
     {
-        // infinity func
-        if(!window.popup.interval){
-            window.popup.interval = setInterval(function() {
-                window.popup.changeOnlinerPrices();
-            }, 500);
-        }
+        // // infinity func
+        // if(!window.popup.interval){
+        //     window.popup.interval = setInterval(function() {
+        //         window.popup.changeOnlinerPrices();
+        //     }, 500);
+        // }
 
         if((this.total_host.indexOf('ab.onliner.by') != -1) || (this.total_host.indexOf('mb.onliner.by') != -1)){
             this.abPrices();
@@ -453,10 +453,10 @@ window.popupObj.prototype = {
      */
     catalogPrices: function()
     {
-        if(($$('pprice_byr').length == 0) && ($$('b-offers-desc__info-sub').length == 0) && ($$('pgprice').length == 0))
+        if(($$('pprice').length == 0) && ($$('b-offers-desc__info-sub').length == 0) && ($$('pgprice').length == 0))
             return 0;
 
-        var rows_list = $$('pprice_byr');
+        var rows_list = $$('pprice');
         var rows_view = $$('b-offers-desc__info-sub');
         var rows_done = $$('updatedPrice');
         var rows_hidden = $$('b-offers-desc__list');
@@ -602,12 +602,16 @@ window.popupObj.prototype = {
                 else{
                     var html = '';
                     for(k in prices){
-                        html += '<div class="pprice" style="font-size: 13px;">'+prices[k].join(' - ')+' <span style="color: #f00; font-size: 13px;">'+k.toUpperCase()+'</span></div>';
+                        html += '<div style="color: #000000; font: bold 13px Arial, Helvetica, sans-serif;">'+prices[k].join(' - ')+' <span style="color: #f00; font-size: 13px;">'+k.toUpperCase()+'</span></div>';
                     }
 
                     var newItem = document.createElement("div");
                     newItem.innerHTML = html;
-                    rows[i].parentNode.insertBefore(newItem, rows[i].parentNode.children[1]);
+
+                    if(rows[i].className.indexOf('pprice_byr') != -1)
+                        rows[i].parentNode.insertBefore(newItem, rows[i].parentNode.children[1]);
+                    else
+                        rows[i].insertBefore(newItem, rows[i].children[1]);
                 }
                 rows[i].className += ' updatedPrice';
             }
