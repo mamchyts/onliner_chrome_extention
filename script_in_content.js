@@ -178,12 +178,12 @@ window.popupObj.prototype = {
      */
     changeOnlinerPrices: function()
     {
-        // // infinity func
-        // if(!window.popup.interval){
-        //     window.popup.interval = setInterval(function() {
-        //         window.popup.changeOnlinerPrices();
-        //     }, 500);
-        // }
+        // infinity func
+        if(!window.popup.interval){
+            window.popup.interval = setInterval(function() {
+                window.popup.changeOnlinerPrices();
+            }, 500);
+        }
 
         if((this.total_host.indexOf('ab.onliner.by') != -1) || (this.total_host.indexOf('mb.onliner.by') != -1)){
             this.abPrices();
@@ -370,7 +370,7 @@ window.popupObj.prototype = {
         if(($$('arenda-main__box').length == 0) && ($$('apartment-bar__inner').length == 0))
             return 0;
 
-        var rows_list = $$('classified__figure');
+        var rows_list = $$('classified');
         var rows_view = $$('apartment-bar__inner');
         var rows_done = $$('updatedPrice');
 
@@ -440,7 +440,7 @@ window.popupObj.prototype = {
                     c = 'RUB';
                 }
 
-                var html = '<div style="position: absolute; float: right; display: block; top: -105px; right: 5px; background: #fd2; padding: 5px 0px 5px 10px">'+trim(p)+' <span style="background: #fd8e01; padding: 3px 5px">'+c+'</span></div>';
+                var html = '<div style="position: absolute; float: right; display: block; top: 5px; right: 5px; background: #fd2; padding: 4px 0px 4px 5px">'+trim(p)+' <span style="background: #fd8e01; padding: 3px 5px">'+c+'</span></div>';
                 rows[i].children[0].innerHTML += html;
                 rows[i].className += ' updatedPrice';
             }
